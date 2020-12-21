@@ -6,7 +6,7 @@ Features:
 
 * Diff result output is human readable and doesn't require a manual
 * Contains functions to apply and reverse a diff
-* Can be used also for deep equality checks
+* Can be used for deep equality checks
 * Single file with 200 lines of plain Node.js code and no dependencies
 
 ## Installation
