@@ -1,0 +1,29 @@
+{
+  "name": "object-diffy",
+  "version": "1.0.0",
+  "description": "Diff nested JSON-like data in JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peter/object-diffy.git"
+  },
+  "keywords": [
+    "diff",
+    "json",
+    "patch",
+    "equality",
+    "nested"
+  ],
+  "author": "Peter Marklund",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/peter/object-diffy/issues"
+  },
+  "homepage": "https://github.com/peter/object-diffy#readme",
+  "devDependencies": {
+    "jest": "^26.6.3"
+  }
+}
