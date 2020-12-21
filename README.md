@@ -31,6 +31,7 @@ const toObj = {
 }
 
 const diffResult = diff(fromObj, toObj)
+// =>
 // {
 //   foo: { type: 'updated', from: 1, to: 2 },
 //   'bar.0.baz': { type: 'updated', from: 2, to: 3 }
