@@ -6,6 +6,7 @@ Features:
 
 * Diff result output is human readable and doesn't require a manual
 * Contains functions to apply and reverse a diff
+* Can be used also for deep equality checks
 * Single file with 200 lines of plain Node.js code and no dependencies
 
 ## Installation
@@ -17,7 +18,7 @@ npm install object-diff
 ## Usage
 
 ```javascript
-const { diff, applyDiff, reverseDiff } = require('object-diffy')
+const { diff, applyDiff, reverseDiff, isEqual } = require('object-diffy')
 
 const fromObj = {
     foo: 1,
@@ -37,4 +38,7 @@ const diffResult = diff(fromObj, toObj)
 
 applyDiff(fromObj, diffResult) // => toObj
 reverseDiff(toObj, diffResult) // => fromObj
+
+isEqual({foo: 1}, {foo: 1}) // => true
+isEqual({foo: 1}, {foo: '1'}) // => false
 ```

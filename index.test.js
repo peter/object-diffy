@@ -1,5 +1,5 @@
 
-const { diff, applyDiff, reverseDiff } = require('./index')
+const { diff, applyDiff, reverseDiff, isEqual } = require('./index')
 
 function cloneJsonObject (obj) {
   if (obj == null) return undefined
@@ -83,6 +83,28 @@ describe('object-diffy', () => {
 
     test('can return a nested diff result with the nested option', () => {
       expect(diff({ foo: {} }, { foo: { bar: 1 } }, { nested: true })).toEqual({ foo: { bar: { type: 'added', from: undefined, to: 1 } } })
+    })
+  })
+
+  describe('isEqual', () => {
+    test('can check equality for primitives, objects, and arrays', () => {
+      expect(isEqual(null, null)).toEqual(true)
+      expect(isEqual(undefined, undefined)).toEqual(true)
+      expect(isEqual(null, undefined)).toEqual(false)
+      expect(isEqual(true, true)).toEqual(true)
+      expect(isEqual(true, false)).toEqual(false)
+      expect(isEqual(5, 5)).toEqual(true)
+      expect(isEqual(5, 6)).toEqual(false)
+      expect(isEqual(5, '5')).toEqual(false)
+
+      expect(isEqual({}, [])).toEqual(false)
+      expect(isEqual({}, 5)).toEqual(false)
+      expect(isEqual({foo: 1}, {foo: 1})).toEqual(true)
+      expect(isEqual({foo: 1}, {foo: '1'})).toEqual(false)
+
+      expect(isEqual([1], [1])).toEqual(true)
+      expect(isEqual([1], ['1'])).toEqual(false)
+      expect(isEqual([1], [1, 2])).toEqual(false)
     })
   })
 })

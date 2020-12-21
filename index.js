@@ -256,8 +256,13 @@ function reverseDiff (obj, diffResult) {
   return applyDiff(obj, diffResult, { direction: 'from' })
 }
 
+function isEqual (obj1, obj2) {
+  return diff(obj1, obj2) === undefined
+}
+
 module.exports = {
   diff,
   applyDiff,
-  reverseDiff
+  reverseDiff,
+  isEqual
 }
