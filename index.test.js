@@ -1,14 +1,9 @@
 
-const { diff, applyDiff, reverseDiff, isEqual } = require('./index')
-
-function cloneJsonObject (obj) {
-  if (obj == null) return undefined
-  return JSON.parse(JSON.stringify(obj))
-}
+const { diff, applyDiff, reverseDiff, isEqual, cloneObject } = require('./index')
 
 function expectDiff (obj1, obj2, expectedDiff) {
-  const _obj1 = cloneJsonObject(obj1)
-  const _obj2 = cloneJsonObject(obj2)
+  const _obj1 = cloneObject(obj1)
+  const _obj2 = cloneObject(obj2)
   const actualDiff = diff(obj1, obj2)
   expect(actualDiff).toEqual(expectedDiff)
   expect(applyDiff(_obj1, actualDiff)).toEqual(_obj2)
@@ -79,6 +74,13 @@ describe('object-diffy', () => {
       expectDiff({ foo: 1 }, { foo: 2 }, { foo: { type: 'updated', from: 1, to: 2 } })
       expectDiff({ foo: { bar: 1 } }, { foo: { bar: 2 } }, { 'foo.bar': { type: 'updated', from: 1, to: 2 } })
       expectDiff({ foo: { bar: 1 } }, { foo: 1 }, { foo: { type: 'updated', from: { bar: 1 }, to: 1, fromType: 'object', toType: 'number' } })
+    })
+
+    test('can handle Date objects', () => {
+      const d1 = new Date()
+      const d2 = new Date()
+      expectDiff({ date: d1 }, { date: d1 }, undefined)
+      expectDiff({ date: d1 }, { date: d2 }, { date: { type: 'updated', from: d1, to: d2 } })
     })
 
     test('can return a nested diff result with the nested option', () => {

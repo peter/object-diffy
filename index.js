@@ -6,9 +6,18 @@ function isObject (value) {
   return value != null && typeof value === 'object' && value.constructor === Object
 }
 
-function cloneJsonObject (obj) {
+function cloneObject (obj) {
   if (obj == null) return undefined
-  return JSON.parse(JSON.stringify(obj))
+  if (Array.isArray(obj)) {
+    return obj.map(v => cloneObject(v))
+  } else if (isObject(obj)) {
+    return Object.keys(obj).reduce((acc, key) => {
+      acc[key] = cloneObject(obj[key])
+      return acc
+    }, {})
+  } else {
+    return obj
+  }
 }
 
 // Similar to https://lodash.com/docs#isEmpty
@@ -53,7 +62,7 @@ function get (obj, path, defaultValue) {
 
 function updateIn (obj, path, updateFn) {
   path = Array.isArray(path) ? path : path.split('.')
-  const result = obj == null ? {} : cloneJsonObject(obj)
+  const result = obj == null ? {} : cloneObject(obj)
   let nested = result
   for (let i = 0; i < path.length - 1; ++i) {
     let value = nested[path[i]]
@@ -127,6 +136,23 @@ function last (array) {
 }
 
 ///////////////////////////////////
+// Type Utility Functions
+///////////////////////////////////
+
+// Similar to: https://github.com/jonschlinkert/kind-of/blob/master/index.js
+function typeOf (value) {
+  if (value === null) return 'null'
+  if (value === undefined) return 'undefined'
+  if (typeof value === 'number' && isNaN(value)) return 'NaN'
+  if (value === Infinity) return "Infinity";
+  if (Array.isArray(value)) return 'array'
+  if (value instanceof Date) return 'date'
+  if (value instanceof Error) return 'error'
+  if (value instanceof RegExp) return 'regexp'
+  return typeof value
+}
+
+///////////////////////////////////
 // Diff Functions
 ///////////////////////////////////
 
@@ -138,24 +164,11 @@ function pathArray (path) {
   return Array.isArray(path) ? path : path.split('.')
 }
 
-function valueType (value) {
-  if (value === undefined) {
-    return 'undefined'
-  } else if (value === null) {
-    return 'null'
-  } else if (Array.isArray(value)) {
-    return 'array'
-  } else {
-    // object, string, number, boolean
-    return typeof value
-  }
-}
-
 // Deep diff of two JSON type objects
 // Similar library: https://github.com/flitbit/diff
 function _diff (v1, v2, path = []) {
-  const t1 = valueType(v1)
-  const t2 = valueType(v2)
+  const t1 = typeOf(v1)
+  const t2 = typeOf(v2)
   if (t1 !== t2) {
     return {
       [pathString(path)]: {
@@ -208,7 +221,7 @@ function _diff (v1, v2, path = []) {
     })
     return concat(addDiffs, deleteDiffs, changeDiffs).reduce(merge, {})
   } else {
-    if (v1 !== v2) {
+    if ((t1 === 'date' && v1.getTime() !== v2.getTime()) || v1 !== v2) {
       return {
         [pathString(path)]: {
           type: 'updated',
@@ -238,13 +251,17 @@ function diff (fromObj, toObj, options = {}) {
 function applyDiff (obj, diffResult, options = {}) {
   if (!diffResult) return obj
   const direction = options.direction || 'to'
-  let result = cloneJsonObject(obj)
+  let result = cloneObject(obj)
   for (const [path, pathResult] of Object.entries(diffResult)) {
     const parentPath = pathArray(path).slice(0, -1)
     const parentValue = get(result, parentPath)
-    if (Array.isArray(parentValue) && ((pathResult.type === 'deleted' && direction === 'to') || (pathResult.type === 'added' && direction === 'from'))) {
-      const deletedIndex = parseInt(last(pathArray(path)))
-      result = setIn(result, parentPath, parentValue.filter((_, index) => index < deletedIndex))
+    if ((pathResult.type === 'deleted' && direction === 'to') || (pathResult.type === 'added' && direction === 'from')) {
+      const deletedKey = last(pathArray(path))
+      if (Array.isArray(parentValue)) {
+        result = setIn(result, parentPath, parentValue.filter((_, index) => index < parseInt(deletedKey)))
+      } else if (isObject(parentValue)) {
+        delete parentValue[deletedKey]
+      }
     } else {
       result = setIn(result, path, pathResult[direction])
     }
@@ -264,5 +281,6 @@ module.exports = {
   diff,
   applyDiff,
   reverseDiff,
-  isEqual
+  isEqual,
+  cloneObject
 }

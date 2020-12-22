@@ -18,21 +18,26 @@ npm install object-diff
 ## Usage
 
 ```javascript
-const { diff, applyDiff, reverseDiff, isEqual } = require('object-diffy')
+const { diff, applyDiff, reverseDiff, isEqual } = require('./index')
 const assertEqual = require('assert').deepStrictEqual
 
+const date = new Date()
+
 const fromObj = {
+    date,
     foo: 1,
     bar: [{baz: 2}]
 }
 
 const toObj = {
+    date,
     foo: '1',
     bar: [],
     bla: true
 }
 
 const diffResult = diff(fromObj, toObj)
+
 assertEqual(
     diffResult,
     {
@@ -46,15 +51,17 @@ assertEqual(
     applyDiff(fromObj, diffResult),
     toObj
 )
+
 assertEqual(
     reverseDiff(toObj, diffResult),
     fromObj
 )
 
 assertEqual(
-    isEqual({foo: 1}, {foo: 1})
+    isEqual({foo: 1}, {foo: 1}),
     true
 )
+
 assertEqual(
     isEqual({foo: 1}, {foo: '1'}),
     false
