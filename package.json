@@ -1,6 +1,6 @@
 {
   "name": "object-diffy",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Diff nested JSON-like data in JavaScript",
   "main": "index.js",
   "scripts": {

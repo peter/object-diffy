@@ -7,7 +7,6 @@ function isObject (value) {
 }
 
 function cloneObject (obj) {
-  if (obj == null) return undefined
   if (Array.isArray(obj)) {
     return obj.map(v => cloneObject(v))
   } else if (isObject(obj)) {
