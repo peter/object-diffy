@@ -1,13 +1,20 @@
 
 const { diff, applyDiff, reverseDiff, isEqual, cloneObject } = require('./index')
+const assertEqual = require('assert').deepStrictEqual
+
+function expectEqual (v1, v2) {
+  expect(v1).toEqual(v2)
+  // NOTE: Jest doesn't handle undefined values in objects well in equality checks
+  assertEqual(v1, v2)
+}
 
 function expectDiff (obj1, obj2, expectedDiff) {
   const _obj1 = cloneObject(obj1)
   const _obj2 = cloneObject(obj2)
   const actualDiff = diff(obj1, obj2)
-  expect(actualDiff).toEqual(expectedDiff)
-  expect(applyDiff(_obj1, actualDiff)).toEqual(_obj2)
-  expect(reverseDiff(_obj2, actualDiff)).toEqual(_obj1)
+  expectEqual(actualDiff, expectedDiff)
+  expectEqual(applyDiff(_obj1, actualDiff), _obj2)
+  expectEqual(reverseDiff(_obj2, actualDiff), _obj1)
 }
 
 describe('object-diffy', () => {
