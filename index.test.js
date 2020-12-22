@@ -78,7 +78,7 @@ describe('object-diffy', () => {
 
       expectDiff({ foo: 1 }, { foo: 2 }, { foo: { type: 'updated', from: 1, to: 2 } })
       expectDiff({ foo: { bar: 1 } }, { foo: { bar: 2 } }, { 'foo.bar': { type: 'updated', from: 1, to: 2 } })
-      expectDiff({ foo: { bar: 1 } }, { foo: 1 }, { foo: { type: 'updated', from: { bar: 1 }, to: 1, typeFrom: 'object', typeTo: 'number' } })
+      expectDiff({ foo: { bar: 1 } }, { foo: 1 }, { foo: { type: 'updated', from: { bar: 1 }, to: 1, fromType: 'object', toType: 'number' } })
     })
 
     test('can return a nested diff result with the nested option', () => {

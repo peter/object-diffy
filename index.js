@@ -162,8 +162,8 @@ function _diff (v1, v2, path = []) {
         type: 'updated',
         from: v1,
         to: v2,
-        typeFrom: t1,
-        typeTo: t2
+        fromType: t1,
+        toType: t2
       }
     }
   }
