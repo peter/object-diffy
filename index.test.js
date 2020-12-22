@@ -70,6 +70,13 @@ describe('object-diffy', () => {
     })
 
     test('can handle deep addition, deletion, and update in objects', () => {
+      expectDiff({ a: { b: 1, c: 2 } }, {}, { a: { type: 'deleted', from: { b: 1, c: 2 }, to: undefined } })
+      expectDiff({ a: [{ b: 1, c: 2 }] }, { a: [{ c: '2', d: 3 }] }, {
+        'a.0.b': { type: 'deleted', from: 1, to: undefined },
+        'a.0.c': { type: 'updated', from: 2, to: '2', fromType: 'number', toType: 'string' },
+        'a.0.d': { type: 'added', from: undefined, to: 3 }
+      })
+
       expectDiff({}, { foo: 1 }, { foo: { type: 'added', from: undefined, to: 1 } })
       expectDiff({ foo: {} }, { foo: { bar: 1 } }, { 'foo.bar': { type: 'added', from: undefined, to: 1 } })
       expectDiff({}, { foo: { bar: 1 } }, { foo: { type: 'added', from: undefined, to: { bar: 1 } } })
