@@ -8,10 +8,10 @@ function expectEqual (v1, v2) {
   assertEqual(v1, v2)
 }
 
-function expectDiff (obj1, obj2, expectedDiff) {
+function expectDiff (obj1, obj2, expectedDiff, options = {}) {
   const _obj1 = cloneObject(obj1)
   const _obj2 = cloneObject(obj2)
-  const actualDiff = diff(obj1, obj2)
+  const actualDiff = diff(obj1, obj2, options)
   expectEqual(actualDiff, expectedDiff)
   expectEqual(applyDiff(_obj1, actualDiff), _obj2)
   expectEqual(reverseDiff(_obj2, actualDiff), _obj1)
@@ -99,6 +99,34 @@ describe('object-diffy', () => {
 
     test('can return a nested diff result with the nested option', () => {
       expect(diff({ foo: {} }, { foo: { bar: 1 } }, { nested: true })).toEqual({ foo: { bar: { type: 'added', from: undefined, to: 1 } } })
+    })
+
+    test('can be configured to output shallower diffs with the recurseIf option', () => {
+      const fromObj = {
+        foo: {
+            bar: 1,
+            baz: {
+                bla: 2
+            }
+        },
+        boo: [1, 2, 3]
+      }
+      const toObj = {
+          foo: {
+              bar: 2,
+              baz: {
+                  bla: 3
+              }
+          },
+          boo: [3, 2, 1]
+      }
+      const recurseIf = (value, path) => !Array.isArray(value) && path.length <= 1
+      const options = { recurseIf }
+      expectDiff(fromObj, toObj, {
+        'foo.bar': { type: 'updated', from: 1, to: 2 },
+        'foo.baz': { type: 'updated', from: { bla: 2 }, to: { bla: 3 } },
+        'boo': { type: 'updated', from: [ 1, 2, 3 ], to: [ 3, 2, 1 ] }
+      }, options)
     })
   })
 

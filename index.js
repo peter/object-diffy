@@ -38,6 +38,15 @@ function merge (toObj, fromObj) {
   return Object.assign.apply(null, args)
 }
 
+// Similar to https://lodash.com/docs/#mapValues
+function mapObj (obj, valueTransform) {
+  if (obj == null) return undefined
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    acc[key] = valueTransform(value, key)
+    return acc
+  }, {})
+}
+
 // Similar to http://ramdajs.com/docs/#path and https://lodash.com/docs#get
 // but can additionally map over (reach into) objects in arrays.
 function get (obj, path, defaultValue) {
@@ -165,19 +174,25 @@ function pathArray (path) {
 
 // Deep diff of two JSON type objects
 // Similar library: https://github.com/flitbit/diff
-function _diff (v1, v2, path = []) {
+function _diff (v1, v2, options = {}, path = []) {
   const t1 = typeOf(v1)
   const t2 = typeOf(v2)
+  const recurseIf = options.recurseIf || (() => true)
+  const updatedDiff = {
+    [pathString(path)]: {
+      type: 'updated',
+      from: v1,
+      to: v2
+    }
+  }
   if (t1 !== t2) {
-    return {
-      [pathString(path)]: {
-        type: 'updated',
-        from: v1,
-        to: v2,
+    return mapObj(updatedDiff, (diff) => {
+      return {
+        ...diff,
         fromType: t1,
         toType: t2
       }
-    }
+    })
   }
   if (t1 === 'array') {
     let arrayDiffs = []
@@ -199,9 +214,14 @@ function _diff (v1, v2, path = []) {
     // changed items
     const diffLength = Math.min(v1.length, v2.length)
     arrayDiffs = concat(arrayDiffs, range(0, diffLength).map((index) => {
-      return _diff(v1[index], v2[index], append(path, index))
+      return _diff(v1[index], v2[index], options, append(path, index))
     }))
-    return arrayDiffs.reduce(merge, {})
+    arrayDiffs = arrayDiffs.reduce(merge, {})
+    if (recurseIf(v1, path)) {
+      return arrayDiffs
+    } else if (!isEmpty(arrayDiffs)) {
+      return updatedDiff
+    }
   } else if (t1 === 'object') {
     const keys1 = Object.keys(v1)
     const keys2 = Object.keys(v2)
@@ -216,18 +236,17 @@ function _diff (v1, v2, path = []) {
       }
     })
     const changeDiffs = intersection(keys1, keys2).map((key) => {
-      return _diff(v1[key], v2[key], append(path, key))
+      return _diff(v1[key], v2[key], options, append(path, key))
     })
-    return concat(addDiffs, deleteDiffs, changeDiffs).reduce(merge, {})
+    const objectDiffs = concat(addDiffs, deleteDiffs, changeDiffs).reduce(merge, {})
+    if (recurseIf(v1, path)) {
+      return objectDiffs
+    } else if (!isEmpty(objectDiffs)) {
+      return updatedDiff
+    }
   } else {
     if ((t1 === 'date' && v1.getTime() !== v2.getTime()) || v1 !== v2) {
-      return {
-        [pathString(path)]: {
-          type: 'updated',
-          from: v1,
-          to: v2
-        }
-      }
+      return updatedDiff
     } else {
       return {}
     }
@@ -239,7 +258,7 @@ function makeNested (diffResult) {
 }
 
 function diff (fromObj, toObj, options = {}) {
-  const result = _diff(fromObj, toObj)
+  const result = _diff(fromObj, toObj, options)
   if (isEmpty(result)) {
     return undefined
   } else {
