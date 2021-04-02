@@ -12,7 +12,7 @@ Features:
 ## Installation
 
 ```sh
-npm install object-diff
+npm install object-diffy
 ```
 
 ## Usage
