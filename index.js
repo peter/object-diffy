@@ -244,13 +244,12 @@ function _diff (v1, v2, options = {}, path = []) {
     } else if (!isEmpty(objectDiffs)) {
       return updatedDiff
     }
-  } else {
-    if ((t1 === 'date' && v1.getTime() !== v2.getTime()) || v1 !== v2) {
-      return updatedDiff
-    } else {
-      return {}
-    }
+  } else if (t1 === 'date' && t2 === 'date' && v1.getTime() === v2.getTime()) {
+    // break
+  } else if (v1 !== v2) {
+    return updatedDiff
   }
+  return {}
 }
 
 function makeNested (diffResult) {
