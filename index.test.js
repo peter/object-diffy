@@ -91,11 +91,17 @@ describe('object-diffy', () => {
     })
 
     test('can handle Date objects', () => {
-      const d1 = new Date()
-      const d2 = new Date()
+      const d1 = new Date('2021-12-12')
+      const d2 = new Date('2021-12-13')
       expectDiff({ date: d1 }, { date: d1 }, undefined)
       expectDiff({ date: d1 }, { date: d2 }, { date: { type: 'updated', from: d1, to: d2 } })
     })
+
+    test('can handle different Date objects with the same dates', () => {
+      const d1 = new Date();
+      const d2 = new Date(d1);
+      expectDiff({ date: d1 }, { date: d2 }, undefined)
+    });
 
     test('can return a nested diff result with the nested option', () => {
       expect(diff({ foo: {} }, { foo: { bar: 1 } }, { nested: true })).toEqual({ foo: { bar: { type: 'added', from: undefined, to: 1 } } })
